@@ -1,0 +1,9 @@
+
+.idea/
+.vscode/
+dist/
+__*__
+*.egg-info
+parameters.json
+*.ttf
+
