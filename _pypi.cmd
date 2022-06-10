@@ -13,6 +13,7 @@ c:\python\3.7\python -m build
 
 pause Check build is correct before proceeding
 echo Username: "__token__", Password: API Key
-c:\python\3.7\python -m twine upload --verbose --repository testpypi dist/*
+
+c:\python\3.7\python -m twine upload --verbose dist/*
 
 pause
