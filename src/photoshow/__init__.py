@@ -12,7 +12,7 @@
 """
 # -----------------------------------------------
 
-from .photoshow import present
+from ._photoshow import present
 
 # -----------------------------------------------
 # End.
