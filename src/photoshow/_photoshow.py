@@ -168,7 +168,7 @@ def _get_captions(parameters, filename, exif_data):
 def _get_month(m):
     """ Returns the month number as text """
 
-    return datetime.datetime.strptime(m, '%M').strftime('%B')
+    return datetime.datetime.strptime(m, '%m').strftime('%B')
 
 
 # -----------------------------------------------
