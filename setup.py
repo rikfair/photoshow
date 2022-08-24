@@ -1,10 +1,11 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('./src/'))
+#sys.path.insert(0, os.path.abspath('./src/'))
+print(f'Setup.py Path: {sys.path}')
 
 import setuptools
 
-import undated as ud
+import photoshow
 
 # ---
 
@@ -14,17 +15,16 @@ def read(fname):
 # ---
 
 setuptools.setup(
-    name = "undated",
-    version = ud.__version__,
+    name = "photoshow",
+    version = photoshow.__version__,
     author = "rikfair",
     author_email = "mail4rik-pypi@yahoo.com",
-    description = "For when dates aren't dates",
-    long_description=read('README.rst'),
-    long_description_content_type = "text/x-rst",
-    url = "https://github.com/rikfair/undated",
+    description = "Full screen photo slideshow",
+    long_description=read('README.md'),
+    long_description_content_type = "text/markdown",
+    url = "https://github.com/rikfair/photoshow",
     project_urls = {
-        "Bug Tracker": "https://github.com/rikfair/undated/issues",
-        "Documentation": "https://undated.readthedocs.io/"
+        "Bug Tracker": "https://github.com/rikfair/photoshow/issues"
     },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -33,16 +33,12 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Database",
-        "Topic :: Office/Business :: Financial",
-        "Topic :: Office/Business :: Financial :: Accounting",
-        "Topic :: Office/Business :: Financial :: Investment",
-        "Topic :: Office/Business :: Financial :: Spreadsheet",
-        "Topic :: Text Processing :: General",
-        "Topic :: Utilities"
+        "Topic :: Multimedia :: Graphics :: Presentation",
+        "Topic :: Multimedia :: Graphics :: Viewers",
     ],
     license = "MIT",
+    install_requires = ["piexif>=1.1.3", "Pillow>=9.1.0"],
     package_dir = {"": "src"},
-    packages = setuptools.find_packages(where="src", exclude=["tests*", "timings*"]),
+    packages = setuptools.find_packages(where="src"),
     python_requires = ">=3.7",
 )

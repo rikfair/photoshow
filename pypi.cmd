@@ -40,10 +40,8 @@ echo Installing required packages
 %PYTHONHOME%\python -m pip install --upgrade  --no-warn-script-location pip
 %PYTHONHOME%\python -m pip install --upgrade build
 %PYTHONHOME%\python -m pip install --upgrade  --no-warn-script-location pylint
-%PYTHONHOME%\python -m pip install --upgrade python-dateutil
-%PYTHONHOME%\python -m pip install --upgrade  --no-warn-script-location Sphinx
-%PYTHONHOME%\python -m pip install --upgrade sphinx-rtd-theme
 %PYTHONHOME%\python -m pip install --upgrade twine
+%PYTHONHOME%\python -m pip install -r "%HOME%/src/requirements.txt"
 
 rem =============================================
 
@@ -79,6 +77,7 @@ rem =============================================
 
 %PYTHONHOME%\python -c "import %REPOS% as x; print(f'Confirm all code submitted to GitHub with version: v{x.__version__}')"
 pause
+
 rem =============================================
 
 echo Uploading to pypi

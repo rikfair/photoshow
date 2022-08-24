@@ -1,5 +1,5 @@
 # pyproject.toml
 
 [build-system]
-requires = ["setuptools>=42"]
+requires = ["setuptools>=42", "piexif>=1.1.3", "Pillow>=9.1.0"]
 build-backend = "setuptools.build_meta"
