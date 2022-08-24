@@ -14,5 +14,7 @@
 
 from ._photoshow import present
 
+__version__ = '1.0.6'
+
 # -----------------------------------------------
 # End.

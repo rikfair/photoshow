@@ -50,84 +50,8 @@ _RE_FOLDER_PREFIX = re.compile(r'^[\d\-~]* ')
 # -----------------------------------------------
 
 
-def _create_image(parameters, win, filename):
-    """ Create an image based on the photo """
-
-    photo = Image.open(filename)
-
-    # Get EXIF data to rotate image if necessary
-    try:
-        exif_data = piexif.load(photo.info['exif'])
-        orientation = exif_data.get(piexif.ImageIFD.Orientation, 0)
-        if orientation == 3:
-            photo = photo.transpose(Image.Transpose.ROTATE_180)  # noqa
-        elif orientation == 6:
-            photo = photo.transpose(Image.Transpose.ROTATE_270)  # noqa
-        elif orientation == 8:
-            photo = photo.transpose(Image.Transpose.ROTATE_90)   # noqa
-    except AttributeError as e:
-        print(f'EXIF Attribute Error: {filename} : {e}')
-        exif_data = {}
-
-    # Get image size
-    photo_width, photo_height = photo.size
-    wratio = win.winfo_screenwidth() / photo_width
-    hratio = win.winfo_screenheight() / photo_height
-
-    # Resize background, bigger than screen, then crop
-    ratio = max(wratio, hratio) * 1.2
-    bg_width = int(photo_width * ratio)
-    bg_height = int(photo_height * ratio)
-    left = int((bg_width - win.winfo_screenwidth()) / 2)
-    top = int((bg_height - win.winfo_screenheight()) / 2)
-    # Background image: Greyscale, Blur and Brightness
-    bg = Image.new('RGBA', (bg_width, bg_height))
-    bg.paste(photo.resize((bg_width, bg_height), Image.Resampling.LANCZOS).convert('L'), (0, 0))  # noqa
-    bg = bg.crop((left, top, (left + win.winfo_screenwidth()), (top + win.winfo_screenheight())))
-    bg = bg.filter(ImageFilter.GaussianBlur(radius=6))
-
-    # Blend white image to fade the background
-    wi = Image.new('RGBA', bg.size, color=(255, 255, 255))
-    bg = Image.blend(bg, wi, 0.7)
-
-    # Add photo to background
-    ratio = min(wratio, hratio) * 0.95
-    fg_width = int(photo_width * ratio)
-    fg_height = int(photo_height * ratio)
-    photo = photo.resize((fg_width, fg_height), Image.Resampling.LANCZOS)  # noqa Anti-Alias
-    left = int((win.winfo_screenwidth() - fg_width) / 2)
-    top = int((win.winfo_screenheight() - fg_height) / 2)
-    bg.paste(photo, (left, top))
-
-    # Add captions to image
-    if parameters[_CAPTIONS]:
-        caption1, caption2 = _get_captions(parameters, filename, exif_data)
-        if caption1:
-            bg = bg.transpose(Image.Transpose.ROTATE_270)  # noqa
-            d = ImageDraw.Draw(bg)
-            d.text((21, 11), caption1, font=parameters[_FONT_BIG], fill='white')
-            d.text((20, 10), caption1, font=parameters[_FONT_BIG], fill='darkslateblue')
-            d.text((31, 71), caption2, font=parameters[_FONT_SMALL], fill='white')
-            d.text((30, 70), caption2, font=parameters[_FONT_SMALL], fill='slateblue')
-            bg = bg.transpose(Image.Transpose.ROTATE_90)   # noqa
-
-    return ImageTk.PhotoImage(bg)
-
-
-# -----------------------------------------------
-
-
-def _format_path(path):
-    """ Formats a path easier comparison """
-
-    return path.upper().replace('/', '?').replace('\\', '?')
-
-
-# -----------------------------------------------
-
-
-def _get_captions(parameters, filename, exif_data):
-    """ Extracts text from the filename and the path. """
+def _add_captions(parameters, filename, exif_data, bgi):
+    """ Extracts text from the filename and the path, then adds the captions to the image """
 
     caption2 = ''
 
@@ -159,16 +83,87 @@ def _get_captions(parameters, filename, exif_data):
     else:
         caption1 = ''
 
-    return caption1, caption2
+    # ---
+
+    if caption1:
+        bgi = bgi.transpose(Image.Transpose.ROTATE_270)  # noqa
+        bgd = ImageDraw.Draw(bgi)
+        bgd.text((21, 11), caption1, font=parameters[_FONT_BIG], fill='white')
+        bgd.text((20, 10), caption1, font=parameters[_FONT_BIG], fill='darkslateblue')
+        bgd.text((31, 71), caption2, font=parameters[_FONT_SMALL], fill='white')
+        bgd.text((30, 70), caption2, font=parameters[_FONT_SMALL], fill='slateblue')
+        bgi = bgi.transpose(Image.Transpose.ROTATE_90)  # noqa
+
+    return bgi
 
 
 # -----------------------------------------------
 
 
-def _get_month(m):
+def _create_image(parameters, win, filename):
+    """ Create an image based on the photo """
+
+    photo = Image.open(filename)
+
+    # Get EXIF data and rotate image if necessary
+    try:
+        exif_data = piexif.load(photo.info['exif'])
+        orientation = exif_data.get('0th', {}).get(piexif.ImageIFD.Orientation, 0)
+        if orientation == 3:
+            photo = photo.transpose(Image.Transpose.ROTATE_180)  # noqa
+        elif orientation == 6:
+            photo = photo.transpose(Image.Transpose.ROTATE_270)  # noqa
+        elif orientation == 8:
+            photo = photo.transpose(Image.Transpose.ROTATE_90)   # noqa
+    except AttributeError as err:
+        print(f'EXIF Attribute Error: {filename} : {err}')
+        exif_data = {}
+
+    # Get image size
+    ratios = win.winfo_screenwidth() / photo.size[0], win.winfo_screenheight() / photo.size[1]
+    # Resize background, bigger than screen, then crop
+    ratio = max(ratios) * 1.2
+    bg_size = int(photo.size[0] * ratio), int(photo.size[1] * ratio)
+    left = int((bg_size[0] - win.winfo_screenwidth()) / 2)
+    top = int((bg_size[1] - win.winfo_screenheight()) / 2)
+    # Background image: Greyscale, Blur and Brightness
+    bgi = Image.new('RGBA', bg_size)
+    bgi.paste(photo.resize(bg_size, Image.Resampling.LANCZOS).convert('L'), (0, 0))  # noqa
+    bgi = bgi.crop((left, top, (left + win.winfo_screenwidth()), (top + win.winfo_screenheight())))
+    bgi = bgi.filter(ImageFilter.GaussianBlur(radius=6))
+    # Blend white image to fade the background
+    bgi = Image.blend(bgi, Image.new('RGBA', bgi.size, color=(255, 255, 255)), 0.7)
+    # Add photo to background
+    ratio = min(ratios) * 0.95
+    fg_width = int(photo.size[0] * ratio)
+    fg_height = int(photo.size[1] * ratio)
+    photo = photo.resize((fg_width, fg_height), Image.Resampling.LANCZOS)  # noqa Anti-Alias
+    left = int((win.winfo_screenwidth() - fg_width) / 2)
+    top = int((win.winfo_screenheight() - fg_height) / 2)
+    bgi.paste(photo, (left, top))
+    # Add captions to image
+    if parameters[_CAPTIONS]:
+        bgi = _add_captions(parameters, filename, exif_data, bgi)
+
+    return ImageTk.PhotoImage(bgi)
+
+
+# -----------------------------------------------
+
+
+def _format_path(path):
+    """ Formats a path easier comparison """
+
+    return path.upper().replace('/', '?').replace('\\', '?')
+
+
+# -----------------------------------------------
+
+
+def _get_month(mth):
     """ Returns the month number as text """
 
-    return datetime.datetime.strptime(m, '%m').strftime('%B')
+    return datetime.datetime.strptime(mth, '%m').strftime('%B')
 
 
 # -----------------------------------------------
@@ -196,9 +191,9 @@ def _get_parameters(path, **kwargs):
     if path.lower().endswith('.json'):
         with open(path, encoding='utf-8') as file:
             parameters = json.load(file)
-        for k, v in parameters.items():
-            if k not in kwargs:
-                kwargs[k] = v
+        for key, val in parameters.items():
+            if key not in kwargs:
+                kwargs[key] = val
         if _OVERRIDE_PATH in kwargs:
             kwargs[_PATH] = _OVERRIDE_PATH
     else:
@@ -214,12 +209,10 @@ def _get_parameters(path, **kwargs):
     # Check for font if provided
 
     font_path = kwargs.get(_FONT_PATH, '')
-    font_exists = os.path.isfile(font_path) if font_path else ''
-    if not font_exists:
-        if font_path:
-            raise Exception(f"Font not found: {font_path}")
-        else:
-            font_path = 'arial.ttf'
+    if font_path and not os.path.isfile(font_path):
+        raise Exception(f"Font not found: {font_path}")
+    if not font_path:
+        font_path = 'arial.ttf'
 
     # Return provided parameter or default values
 
@@ -252,9 +245,9 @@ def _get_photo_list(parameters):
     def ignore_path(path):
         """ Checks the ignore list """
 
-        fp = _format_path(path)
-        for p in parameters[_IGNORE]:
-            if fp.startswith(p):
+        fmt_path = _format_path(path)
+        for i in parameters[_IGNORE]:
+            if fmt_path.startswith(i):
                 return True
         return False
 
@@ -265,10 +258,11 @@ def _get_photo_list(parameters):
 
     for root, _, files in os.walk(home):
         if not ignore_path(root):
-            for img in [f for f in files if f.lower().endswith('.jpg') or f.lower().endswith('.jpeg')]:
-                img_path = os.path.join(root, img)
-                if not ignore_path(img_path):
-                    photos_list.append(img_path)
+            for img_name in files:
+                if img_name.lower().endswith('.jpg') or img_name.lower().endswith('.jpeg'):
+                    img_path = os.path.join(root, img_name)
+                    if not ignore_path(img_path):
+                        photos_list.append(img_path)
 
     if parameters[_RANDOM]:
         return _get_photo_list_random(parameters, photos_list)
@@ -287,13 +281,13 @@ def _get_photo_list_random(parameters, photo_list):
 
     max_photos = parameters[_MAX_PHOTOS]
     photo_count = min(max_photos, len(photo_list)) if max_photos else len(photo_list)
-    random_list = list()
+    random_list = []
 
     if photo_count:
-        for i in range(photo_count):
-            rn = random.randrange(len(photo_list))
-            random_list.append(photo_list[rn])
-            photo_list.pop(rn)
+        for _ in range(photo_count):
+            rno = random.randrange(len(photo_list))
+            random_list.append(photo_list[rno])
+            photo_list.pop(rno)
 
     return random_list
 
@@ -332,7 +326,7 @@ def present(path, **kwargs):
     win.overrideredirect(True)
     win.overrideredirect(False)
     win.attributes('-fullscreen', True)
-    win.geometry('%dx%d+0+0' % (win.winfo_screenwidth(), win.winfo_screenheight()))
+    win.geometry(f'{win.winfo_screenwidth()}x{win.winfo_screenheight()}+0+0')
     win.configure(background='black', cursor='none')
     win.bind('<Escape>', lambda _: _stop(win, parameters))
     win.bind('<Double-Button>', lambda _: _stop(win, parameters))
@@ -349,8 +343,8 @@ def present(path, **kwargs):
         try:
             image = _create_image(parameters, win, filename)
             win.picture_display.config(image=image, borderwidth=0, highlightthickness=0)
-        except Exception as e:
-            print(f'Error: {filename}, {e}')
+        except Exception as err:                # pylint: disable=broad-except
+            print(f'Error: {filename}, {err}')  # Catch, print, and carry on
             continue
 
         parameters[_NEXT_PHOTO] = False
@@ -360,7 +354,7 @@ def present(path, **kwargs):
             win.bind('<Button>', lambda _: _skip_photo(parameters))
             win.bind('<space>', lambda _: _skip_photo(parameters))
 
-        for s in range(parameters[_DELAY]):
+        for _ in range(parameters[_DELAY]):
             if not parameters[_RUN] or parameters[_NEXT_PHOTO]:
                 break
             win.update()
@@ -369,6 +363,12 @@ def present(path, **kwargs):
         if not parameters[_RUN]:
             break
 
+
+# -----------------------------------------------
+
+if __name__ == '__main__':
+    # For development, testing and debugging
+    present('/temp/photoshow/parameters.json')
 
 # -----------------------------------------------
 # End.
