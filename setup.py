@@ -1,7 +1,11 @@
 import os
 import sys
-#sys.path.insert(0, os.path.abspath('./src/'))
-print(f'Setup.py Path: {sys.path}')
+
+_home = os.path.dirname(os.path.abspath(__file__))
+print(f'Home: {_home}')
+sys.path.insert(0, os.path.abspath(f'{_home}/src/'))
+
+# ---
 
 import setuptools
 
@@ -10,7 +14,7 @@ import photoshow
 # ---
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return open(f'{_home}/{fname}').read()
 
 # ---
 

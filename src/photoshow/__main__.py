@@ -1,14 +1,14 @@
-#!/usr/bin/python3
-# -----------------------------------------------
 """
-    DESCRIPTION:
-        Enables the slideshow for photos to run via the command line using python -m
 
-    ASSUMPTIONS:
-        No assumptions to note
+DESCRIPTION:
+    Enables the slideshow for photos to run via the command line using python -m
 
-    ACCURACY:
-        No accuracy issues to note
+ASSUMPTIONS:
+    No assumptions to note
+
+LIMITATIONS:
+    No accuracy issues to note
+
 """
 # -----------------------------------------------
 

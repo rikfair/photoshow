@@ -1,16 +1,17 @@
-#!/usr/bin/python3
-# -----------------------------------------------
 """
-    DESCRIPTION:
-        Slideshow for photos
-        The new Pillow constants are causing errors to be flagged in the IDE.
-        These have been marked with noqa for now, until it can be addressed.
 
-    ASSUMPTIONS:
-        No assumptions to note
+DESCRIPTION:
+    Slideshow for photos
 
-    ACCURACY:
-        No accuracy issues to note
+    The new Pillow constants are causing issues with the IDE linters.
+    These have been marked with noqa for now, until it can be addressed.
+
+ASSUMPTIONS:
+    No assumptions to note
+
+LIMITATIONS:
+    No accuracy issues to note
+
 """
 # -----------------------------------------------
 
@@ -314,11 +315,12 @@ def _stop(win, parameters):
 # -----------------------------------------------
 
 
-def present(path, **kwargs):
+def present(path: str, **kwargs: dict):
     """
-    Run the photo slideshow
-    :param path: String, the root path for the photos
-    :param kwargs: The parameters, see documentation.
+    Present the photo slideshow. AKA "Run It"
+
+    :param path: the path to the root directory for the photos
+    :param kwargs: The parameters, see the tutorial and how to guide for options
     """
 
     parameters = _get_parameters(path, **kwargs)
