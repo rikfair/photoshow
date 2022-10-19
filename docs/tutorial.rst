@@ -48,9 +48,7 @@ Parameters
 Further configuarble parameters, incude whether captions are required and what font should they be in, the time each photo is displayed for, whether the photos should be randomised or played in order, should the slideshow repeat when it reaches the end, plus some others.
 
 - **path**: String, the path to the photo library or the parameter file. This is the only mandatory parameter.
-- **caption**: String or boolean, whether a caption should be added to the slide and if so which,
- options are: ``directory``, ``detail``, ``filename``.
- Detail will try and use Exif data from the ``DateTimeOriginal`` and ``ImageDescription`` elements, falling back to the folder name if data is not found. Use False for no caption. 
+- **caption**: String or boolean, whether a caption should be added to the slide and if so which, options are: ``directory``, ``detail``, ``filename``. The ``detail`` option will try and use Exif data from the ``DateTimeOriginal`` and ``ImageDescription`` elements, falling back to the folder name if data is not found. Use False for no caption. 
 - **delay_time**: Int, the time each photo is displayed for. Default ``15``
 - **delay_unit**: String, either ``M`` minutes or ``S`` seconds. Default ``S``
 - **font_path**: String, the true type font file, including path. The recommended font is ``Kalam-Bold.ttf``, which can be downloaded from `Google Fonts <https://fonts.google.com/specimen/Kalam>`_,
