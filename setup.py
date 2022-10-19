@@ -24,11 +24,12 @@ setuptools.setup(
     author = "rikfair",
     author_email = "mail4rik-pypi@yahoo.com",
     description = "Full screen photo slideshow",
-    long_description=read('README.md'),
-    long_description_content_type = "text/markdown",
+    long_description=read('README.rst'),
+    long_description_content_type = "text/x-rst",
     url = "https://github.com/rikfair/photoshow",
     project_urls = {
-        "Bug Tracker": "https://github.com/rikfair/photoshow/issues"
+        "Bug Tracker": "https://github.com/rikfair/photoshow/issues",
+        "Documentation": "https://photoshow.readthedocs.io/"
     },
     classifiers=[
         "Development Status :: 5 - Production/Stable",

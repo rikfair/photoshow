@@ -17,13 +17,4 @@ Just point photoshow to the image folder and sit back.
 
    Overview <self>
    Tutorial <tutorial>
-   How To <howto>
    Reference <reference>
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
