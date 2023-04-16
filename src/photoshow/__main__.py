@@ -17,6 +17,8 @@ import sys
 import photoshow
 
 # -----------------------------------------------
+# pylint: disable=broad-exception-raised
+# -----------------------------------------------
 
 
 if __name__ == '__main__':

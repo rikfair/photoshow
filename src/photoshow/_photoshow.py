@@ -27,6 +27,8 @@ import piexif
 from PIL import ImageTk, Image, ImageDraw, ImageFont, ImageFilter
 
 # -----------------------------------------------
+# pylint: disable=broad-exception-raised
+# -----------------------------------------------
 
 _CAPTIONS = 'captions'
 _DELAY = 'delay'
@@ -209,11 +211,14 @@ def _get_parameters(path, **kwargs):
 
     # Check for font if provided
 
+    captions = bool(kwargs.get(_CAPTIONS))
     font_path = kwargs.get(_FONT_PATH, '')
-    if font_path and not os.path.isfile(font_path):
-        raise Exception(f"Font not found: {font_path}")
-    if not font_path:
-        font_path = 'arial.ttf'
+    if captions:
+        if font_path and not os.path.isfile(font_path):
+            raise Exception(f"Font not found: {font_path}")
+        if not font_path:
+            # Sets arial as default. Only works on Windows. Linux needs font_path setting.
+            font_path = 'arial.ttf'
 
     # Return provided parameter or default values
 
@@ -223,8 +228,8 @@ def _get_parameters(path, **kwargs):
     return {
         _CAPTIONS: kwargs.get(_CAPTIONS.lower(), False),
         _DELAY: delay_time * {'M': 60}.get(delay_unit, 1),
-        _FONT_BIG: ImageFont.truetype(font_path, 40),
-        _FONT_SMALL: ImageFont.truetype(font_path, 16),
+        _FONT_BIG: ImageFont.truetype(font_path, 40) if captions else None,
+        _FONT_SMALL: ImageFont.truetype(font_path, 16) if captions else None,
         _MAX_PHOTOS: kwargs.get(_MAX_PHOTOS, 0),
         _PATH: kwargs[_PATH],
         _RANDOM: kwargs.get(_RANDOM, True),
